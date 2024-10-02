@@ -37,9 +37,9 @@ if response.status_code == 200:
 else:
     print(f"エラー: GitHubからデータを取得できませんでした。ステータスコード: {response.status_code}")
 
-# 14文字のランダムな文字列を生成
+# slugは半角英数字（a-z0-9）、ハイフン（-）、アンダースコア（_）
 def generate_random_string(length):
-    return ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(length))
+    return ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(length))
 
 random_string = generate_random_string(14)
 
