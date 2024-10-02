@@ -1,4 +1,3 @@
-
 ---
 title: "Laravel v11.0.4 まとめ"
 emoji: "📘"
