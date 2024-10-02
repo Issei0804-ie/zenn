@@ -11,18 +11,18 @@ published: true
 30minで読めるだけ読んだので、全部のリリースはまとめきれてないこともあります。
 リリースノートは[こちら](https://github.com/laravel/framework/releases/tag/v11.0.4)
 
-- [11.x] Add class_exists check for `Spark`'s `subscribed` default alias Middleware by @akr4m in https://github.com/laravel/framework/pull/50489
-- [11.x] Fix: Removed TTY mode to resolve Windows compatibility issue  by @yourchocomate in https://github.com/laravel/framework/pull/50495
-- [11.x] Check for password before storing hash in session by @valorin in https://github.com/laravel/framework/pull/50507
-- [11.x] Fix an issue with missing controller class by @driesvints in https://github.com/laravel/framework/pull/50505
-- [11.x] Add default empty config when creating repository within CacheManager by @noefleury in https://github.com/laravel/framework/pull/50510
+- [11.x] Add class_exists check for `Spark`'s `subscribed` default alias Middleware by @akr4m in #50489
+- [11.x] Fix: Removed TTY mode to resolve Windows compatibility issue  by @yourchocomate in #50495
+- [11.x] Check for password before storing hash in session by @valorin in #50507
+- [11.x] Fix an issue with missing controller class by @driesvints in #50505
+- [11.x] Add default empty config when creating repository within CacheManager by @noefleury in #50510
 
 
-### [11.x] Add class_exists check for `Spark`'s `subscribed` default alias Middleware by @akr4m in https://github.com/laravel/framework/pull/50489
+### [11.x] Add class_exists check for `Spark`'s `subscribed` default alias Middleware by @akr4m in #50489
 
 Laravelのデフォルトの依存関係にSparkが入っていないにも関わらず、デフォルトでSparkのミドルウェアを見つけ出そうとするためクラスが見つからずエラーが出ていたらしい。Sparkのミドルウェアが見つかる時のみ、middlewareのaliasに登録してくれるっぽいです。
 
-### [11.x] Fix: Removed TTY mode to resolve Windows compatibility issue  by @yourchocomate in https://github.com/laravel/framework/pull/50495
+### [11.x] Fix: Removed TTY mode to resolve Windows compatibility issue  by @yourchocomate in #50495
 
 
 Windowsだとttyモードが使えないっぽいので、Windowsの時はttyをfalseにするらしい。
@@ -40,12 +40,12 @@ Process::forever()->tty()->run('vim');
 
 ちなみになぜWindowsだとttyモードが使えないかについてはわからず...
 
-### [11.x] Check for password before storing hash in session by @valorin in https://github.com/laravel/framework/pull/50507
+### [11.x] Check for password before storing hash in session by @valorin in #50507
 
 パスワードを使っていないユーザーを使用するとエラーが投げられるらしい。
 ログアウト時にエラーが発生するっぽいが、そもそもどうやったらパスワード無しで認証ができるのかわからなかった...
 
-### [11.x] Fix an issue with missing controller class by @driesvints in https://github.com/laravel/framework/pull/50505
+### [11.x] Fix an issue with missing controller class by @driesvints in #50505
 
 Laravel11からは基底のControllerが無くてもartisanコマンドからコントローラーを作成できるべきだが、エラーが表示され作成できないというissueがあった。
 
@@ -62,7 +62,7 @@ $baseControllerExists = class_exists($rootNamespace.'Http\Controllers\Controller
 
 修正後はファイルがあるかどうか直接確認していました。
 
-### [11.x] Add default empty config when creating repository within CacheManager by @noefleury in https://github.com/laravel/framework/pull/50510
+### [11.x] Add default empty config when creating repository within CacheManager by @noefleury in #50510
 
 Laravel11のCacheManagerのrepositoryメソッドの引数が1つ増えた。
 
