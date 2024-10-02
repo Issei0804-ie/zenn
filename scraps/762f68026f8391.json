@@ -1,0 +1,106 @@
+{
+  "title": "Inertia-laravel のテストが動かせるように環境構築をする",
+  "closed": true,
+  "archived": false,
+  "created_at": "2024-07-27",
+  "comments": [
+    {
+      "author": "issei_miyara",
+      "created_at": "2024-07-27",
+      "body_markdown": "リポジトリ: https://github.com/inertiajs/inertia-laravel\n\nversion: 1.x\n\nとりあえずリポジトリを手元に落としてくる\n\n```\nghq get git@github.com:inertiajs/inertia-laravel.git\n```\n\nリポジトリのディレクトリまで移動しておく",
+      "body_updated_at": "2024-07-27"
+    },
+    {
+      "author": "issei_miyara",
+      "created_at": "2024-07-27",
+      "body_markdown": "ローカルにインストールした composer && PHP を使用してもいいけど、容易な再現性を確保したいので、コンテナで環境を構築する\n\nDockerfile\n```\nFROM php:8.3-fpm-alpine\n\nCOPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer\n\nRUN apk --no-cache add autoconf build-base linux-headers\n\nRUN pecl install xdebug\n\nRUN docker-php-ext-enable xdebug\n\n```\n\ncompose.yml\n```\nservices:\n  inertia-laravel:\n    build: .\n    volumes:\n      - ./:/app\n      - inertia-laravel-vendor-volume:/app/vendor\n    working_dir: /app\n\nvolumes:\n    inertia-laravel-vendor-volume:\n```\n\nあとは `docker compose up` で立ち上げる。\n\n:::message\n何かcomposer.jsonを追加したときのためにDockerfile内で`composer install` を行わなかったが、composer.jsonに何か追加することが多分なさそうなのでやってもよかったかも...\n:::",
+      "body_updated_at": "2024-07-27"
+    },
+    {
+      "author": "issei_miyara",
+      "created_at": "2024-07-27",
+      "body_markdown": "composer install する\n\n```\ndocker compose exec inertia-laravel ash -c \"composer install\"\n```"
+    },
+    {
+      "author": "issei_miyara",
+      "created_at": "2024-07-27",
+      "body_markdown": "この時点でテストが動くはずなので、一旦動かしてみる\n\n```\n docker compose exec inertia-laravel ash -c \"./vendor/bin/phpunit\"\nPHPUnit 10.5.28 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.9\nConfiguration: /app/phpunit.xml.dist\n\n................................................................. 65 / 86 ( 75%)\n.....................                                             86 / 86 (100%)\n\nTime: 00:00.780, Memory: 32.00 MB\n\nOK (86 tests, 316 assertions)\n```"
+    },
+    {
+      "author": "issei_miyara",
+      "created_at": "2024-07-27",
+      "body_markdown": "いい感じ。"
+    },
+    {
+      "author": "issei_miyara",
+      "created_at": "2024-07-27",
+      "body_markdown": "一旦目標は達成できたが、追加の目標としてXdebugを使ってデバッグしてみる。\nまずEditor側の設定を行う。\nちなみに僕は PHPStorm を使用しています。"
+    },
+    {
+      "author": "issei_miyara",
+      "created_at": "2024-07-27",
+      "body_markdown": "![](https://storage.googleapis.com/zenn-user-upload/4127847847e9-20240727.png)\n\nCLI Interpreter 欄の一番右の ... を押す\n\n![](https://storage.googleapis.com/zenn-user-upload/4cfbcfa23a10-20240727.png)\n\n左上の + を押して `From Docker` を選ぶ\n\n![](https://storage.googleapis.com/zenn-user-upload/7388c8074715-20240727.png)\n\nこういう感じで設定を入れてあげる。\n\n多分、初回だと Server の箇所の設定が必要。\n"
+    },
+    {
+      "author": "issei_miyara",
+      "created_at": "2024-07-27",
+      "body_markdown": "30sくらいかかってCLI Interpreter の設定に戻される。\nこのまま OK を押す\n![](https://storage.googleapis.com/zenn-user-upload/7cc13befd812-20240727.png)"
+    },
+    {
+      "author": "issei_miyara",
+      "created_at": "2024-07-27",
+      "body_markdown": "vendor ファイルがローカルにないと補完が効かないので、コピーしてくる。\n\n```\ndocker compose cp inertia-laravel:/app/vendor ./\n```"
+    },
+    {
+      "author": "issei_miyara",
+      "created_at": "2024-07-27",
+      "body_markdown": "追加で設定が必要で、 Lifecycleは docker compose exec を選んでください((\n![](https://storage.googleapis.com/zenn-user-upload/b25f0160f0bd-20240727.png)"
+    },
+    {
+      "author": "issei_miyara",
+      "created_at": "2024-07-27",
+      "body_markdown": "と思ったけど、どうやらPHPStormは testbench というテストフレームワークに対応していないかも。。\nただ xdebug は欲しいので、 command line debug client をインストールしてみる。\n\nhttps://xdebug.org/docs/dbgpClient"
+    },
+    {
+      "author": "issei_miyara",
+      "created_at": "2024-07-27",
+      "body_markdown": "というわけで Dockerfile を以下のように修正\n\n```diff\nFROM php:8.3-fpm-alpine\n\nCOPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer\n\n+ RUN wget https://xdebug.org/files/binaries/dbgpClient -P /usr/bin/ && chmod +x /usr/bin/dbgpClient\n\nRUN apk --no-cache add autoconf build-base linux-headers\n\nRUN pecl install xdebug\n\nRUN docker-php-ext-enable xdebug\n```"
+    },
+    {
+      "author": "issei_miyara",
+      "created_at": "2024-07-27",
+      "body_markdown": "あと php.ini にいくつか手を加えないといけないので、そこも修正する。\n\n```diff\nFROM php:8.3-fpm-alpine\n\nCOPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer\n\nRUN wget https://xdebug.org/files/binaries/dbgpClient -P /usr/bin/ && chmod +x /usr/bin/dbgpClient\n\nRUN cp \"$PHP_INI_DIR/php.ini-development\" \"$PHP_INI_DIR/php.ini\"\n\n+ RUN echo 'xdebug.mode = debug'  >> \"$PHP_INI_DIR/php.ini\"\n+ RUN echo 'xdebug.start_with_request = yes'  >> \"$PHP_INI_DIR/php.ini\"\n+ RUN echo 'xdebug.client_port = 9003'  >> \"$PHP_INI_DIR/php.ini\"\n\n\nRUN apk --no-cache add autoconf build-base linux-headers\n\nRUN pecl install xdebug\n\nRUN docker-php-ext-enable xdebug\n```",
+      "body_updated_at": "2024-07-27"
+    },
+    {
+      "author": "issei_miyara",
+      "created_at": "2024-07-27",
+      "body_markdown": "dbgpClient を立ち上げる時はこれ\n`docker compose exec inertia-laravel dbgpClient`\n\n"
+    },
+    {
+      "author": "issei_miyara",
+      "created_at": "2024-07-27",
+      "body_markdown": "dbgpClientを立ち上げて、もう一度テストを回す\n\n```\ndocker compose exec inertia-laravel dbgpClient\n\n# 別のターミナルから下記コマンドを打つ\ndocker compose exec inertia-laravel ash -c \"php ./vendor/bin/phpunit\"\n```"
+    },
+    {
+      "author": "issei_miyara",
+      "created_at": "2024-07-27",
+      "body_markdown": "そうするとなんかいい感じにデバッグできそうな雰囲気になる\n\n\n```\ndocker compose exec inertia-laravel dbgpClient\nXdebug Simple DBGp client (0.6.1)\nCopyright 2019-2024 by Derick Rethans\n\nWaiting for debug server to connect on port 9003.\nConnect from [::1]:39442\nDBGp/1.0: Xdebug 3.3.2 — For PHP 8.3.9\nDebugging file:///app/vendor/bin/phpunit (ID: 19/)\n```"
+    },
+    {
+      "author": "issei_miyara",
+      "created_at": "2024-07-27",
+      "body_markdown": "```\n(cmd) breakpoint_set -t line -f file:///app/tests/AlwaysPropTest.php -n 12\n1 | breakpoint_set\n1 | Breakpoint set with ID 190001\n\n(cmd) run\n2 | run > break/ok\n2 | file:///app/tests/AlwaysPropTest.php:13\n```\n\nみたいな感じで使うらしい"
+    },
+    {
+      "author": "issei_miyara",
+      "created_at": "2024-07-27",
+      "body_markdown": "ここまでやって気づいたけど、phpunit実行しているのでエディタからphpunit実行できない理由がわからなくなってきたぞ..."
+    },
+    {
+      "author": "issei_miyara",
+      "created_at": "2024-07-27",
+      "body_markdown": "autoload.phpからphpunitが検出できていないらしい。\n30minくらい調べたけどよくわかんないので一旦放置。\nとりあえず、テストは実行できるようになったのでこれでいいか。\n\n![](https://storage.googleapis.com/zenn-user-upload/cfa81b08540f-20240727.png)"
+    }
+  ]
+}
