@@ -4,6 +4,7 @@ emoji: "📘"
 type: "tech"
 topics:
   - "php"
+  - "laravel"
   - "laravel11"
 published: true
 published_at: "2024-09-30 23:23"
