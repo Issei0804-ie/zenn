@@ -11,6 +11,7 @@ emoji: "📘"
 type: "tech"
 topics:
   - "php"
+  - "laravel"
   - "laravel11"
 published: false
 ---
